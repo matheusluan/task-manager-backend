@@ -70,4 +70,9 @@ export class UserRepository {
             where: { id },
         });
     }
+
+    //COUNT 
+    async countUsers(): Promise<number> {
+        return this.prisma.user.count()
+    }
 }

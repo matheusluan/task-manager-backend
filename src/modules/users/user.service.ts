@@ -8,4 +8,8 @@ export class UserService {
     async findById(id: string) {
         return this.usersRepo.findById(id);
     }
+
+    async countUsers() {
+        return this.usersRepo.countUsers();
+    }
 }

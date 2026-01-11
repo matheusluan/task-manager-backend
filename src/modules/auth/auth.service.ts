@@ -2,6 +2,8 @@ import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../users/user.repository';
+import { RegisterDto } from 'src/shared/dtos/register.dto';
+import { LoginDto } from 'src/shared/dtos/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -10,11 +12,11 @@ export class AuthService {
         private readonly jwtService: JwtService,
     ) { }
 
-    async register(name: string, email: string, password: string) {
+    async register({ email, password, name }: RegisterDto) {
         const exists = await this.usersRepo.findByEmail(email);
-        if (exists) {
+
+        if (exists)
             throw new ConflictException('Email already in use');
-        }
 
         const passwordHash = await bcrypt.hash(password, 10);
 
@@ -27,16 +29,17 @@ export class AuthService {
         return this.generateToken(user.id, user.email);
     }
 
-    async login(email: string, password: string) {
+    async login({ email, password }: LoginDto) {
         const user = await this.usersRepo.findByEmail(email);
-        if (!user) {
+
+        if (!user)
             throw new UnauthorizedException('Invalid credentials');
-        }
 
         const passwordValid = await bcrypt.compare(password, user.password);
-        if (!passwordValid) {
+
+        if (!passwordValid)
             throw new UnauthorizedException('Invalid credentials');
-        }
+
 
         return this.generateToken(user.id, user.email);
     }
