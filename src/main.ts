@@ -3,8 +3,9 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  console.log('JWT_SECRET =>', process.env.JWT_SECRET);
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -13,6 +14,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
 
   await app.listen(process.env.PORT ?? 5000);
 }

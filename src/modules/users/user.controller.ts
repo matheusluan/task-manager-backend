@@ -1,7 +1,8 @@
 import { Controller, Get } from "@nestjs/common";
-import { CurrentUser } from "src/shared/decorators/current-user.decorator";
-import { Public } from 'src/shared/decorators/public.decorator';
+
 import { UserService } from "./user.service";
+import { Public } from 'src/shared/decorators/public.decorator';
+import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 
 @Controller('users')
 export class UserController {
