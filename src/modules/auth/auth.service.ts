@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../users/user.repository';
@@ -36,18 +36,18 @@ export class AuthService {
             maxAge: 1000 * 60 * 60 * 24 * 1, // 1 day same time to live of the jwt
         });
 
-        return { user };
+        return { user: { name: user.name, email: user.email } };
 
     }
 
     async login({ email, password }: LoginDto, res: Response) {
         const user = await this.usersRepo.findByEmail(email);
 
-        if (!user) throw new UnauthorizedException('Invalid credentials');
+        if (!user) throw new NotFoundException('User not found.');
 
         const passwordValid = await bcrypt.compare(password, user.password);
 
-        if (!passwordValid) throw new UnauthorizedException('Invalid credentials');
+        if (!passwordValid) throw new UnauthorizedException('Invalid credentials.');
 
         const token = this.generateToken(user.id, user.email);
 
@@ -58,7 +58,7 @@ export class AuthService {
             maxAge: 1000 * 60 * 60 * 24 * 1, // 1 day same time to live of the jwt
         });
 
-        return { user };
+        return { user: { name: user.name, email: user.email } };
     }
 
     private generateToken(userId: string, email: string) {
