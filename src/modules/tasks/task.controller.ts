@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "src/shared/guards/auth.guard";
 import { TaskService } from "./task.service";
-import { CreateTaskDto, UpdateTaskDto } from "src/shared/dtos/task.dto";
+import { CreateTaskDto, FindTasksDto, UpdateTaskDto } from "src/shared/dtos/task.dto";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 
 @Controller('tasks')
@@ -19,7 +19,7 @@ export class TaskController {
 
     @Get()
     findAll(
-        @Query() query: any,
+        @Query() query: FindTasksDto,
         @CurrentUser() user: { id: string },
     ) {
         return this.taskService.findAll(query, user.id);

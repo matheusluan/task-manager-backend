@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsDateString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsDateString, IsNumberString, IsIn } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 import { TaskPriority, TaskStatus } from 'generated/prisma/enums';
 
@@ -25,3 +25,18 @@ export class CreateTaskDto {
 }
 
 export class UpdateTaskDto extends PartialType(CreateTaskDto) { }
+
+
+export class FindTasksDto {
+    @IsOptional()
+    @IsNumberString()
+    page?: string;
+
+    @IsOptional()
+    @IsNumberString()
+    limit?: string;
+
+    @IsOptional()
+    @IsIn(["priority", "createdAt"])
+    order?: "priority" | "createdAt";
+}

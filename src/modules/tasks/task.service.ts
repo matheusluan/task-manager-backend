@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateTaskDto, UpdateTaskDto } from "src/shared/dtos/task.dto";
-import { TaskRepository } from "./task-repository";
+import { TaskRepository } from "./task.repository";
+import { CreateTaskDto, FindTasksDto, UpdateTaskDto } from "src/shared/dtos/task.dto";
 
 @Injectable()
 export class TaskService {
@@ -16,23 +16,44 @@ export class TaskService {
             user: {
                 connect: { id: userId },
             },
-
         });
     }
 
-    async findAll(query: any, userId: string) {
-        return this.taskRepo.findAll({
-            ...query,
-            userId,
-        });
+    async findAll(query: FindTasksDto, userId: string) {
+        const page = Number(query.page) || 1;
+        const limit = Number(query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const where = { userId };
+
+        const [tasks, total] = await Promise.all([
+            this.taskRepo.findAll({
+                where,
+                skip,
+                take: limit,
+            }),
+            this.taskRepo.count(where),
+        ]);
+
+        return {
+            data: tasks,
+            meta: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
     }
 
     async findById(id: string, userId: string) {
         const task = await this.taskRepo.findById(id);
-        if (!task) throw new NotFoundException();
 
-        const hasAccess = await this.taskRepo.findAll({ userId });
-        if (!hasAccess.find(t => t.id === id)) {
+        if (!task) {
+            throw new NotFoundException();
+        }
+
+        if (task.userId !== userId) {
             throw new ForbiddenException();
         }
 
@@ -41,6 +62,7 @@ export class TaskService {
 
     async update(id: string, dto: UpdateTaskDto, userId: string) {
         await this.findById(id, userId);
+
         return this.taskRepo.update(id, {
             ...dto,
             dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
@@ -51,6 +73,4 @@ export class TaskService {
         await this.findById(id, userId);
         return this.taskRepo.delete(id);
     }
-
-
 }
