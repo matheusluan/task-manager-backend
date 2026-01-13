@@ -76,8 +76,8 @@ export class TaskRepository {
     }
 
     // COUNT
-    async count(): Promise<void> {
-        await this.prisma.task.count();
+    async count(): Promise<number> {
+        return this.prisma.task.count();
     }
 
 
