@@ -15,7 +15,7 @@ import { UserModule } from '../users/user.module';
             inject: [ConfigService],
             useFactory: (config: ConfigService) => ({
                 secret: config.get<string>('JWT_SECRET'),
-                signOptions: { expiresIn: '60s' },
+                signOptions: { expiresIn: '1d' }, // same time to live of the cookie
             }),
         }),
     ],

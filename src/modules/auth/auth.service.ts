@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../users/user.repository';
 import { RegisterDto } from 'src/shared/dtos/register.dto';
 import { LoginDto } from 'src/shared/dtos/login.dto';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +13,7 @@ export class AuthService {
         private readonly jwtService: JwtService,
     ) { }
 
-    async register({ email, password, name }: RegisterDto) {
+    async register({ email, password, name }: RegisterDto, res: Response) {
         const exists = await this.usersRepo.findByEmail(email);
 
         if (exists)
@@ -26,22 +27,38 @@ export class AuthService {
             password: passwordHash,
         });
 
-        return this.generateToken(user.id, user.email);
+        const token = this.generateToken(user.id, user.email);
+
+        res.cookie('auth', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 1000 * 60 * 60 * 24 * 1, // 1 day same time to live of the jwt
+        });
+
+        return { user };
+
     }
 
-    async login({ email, password }: LoginDto) {
+    async login({ email, password }: LoginDto, res: Response) {
         const user = await this.usersRepo.findByEmail(email);
 
-        if (!user)
-            throw new UnauthorizedException('Invalid credentials');
+        if (!user) throw new UnauthorizedException('Invalid credentials');
 
         const passwordValid = await bcrypt.compare(password, user.password);
 
-        if (!passwordValid)
-            throw new UnauthorizedException('Invalid credentials');
+        if (!passwordValid) throw new UnauthorizedException('Invalid credentials');
 
+        const token = this.generateToken(user.id, user.email);
 
-        return this.generateToken(user.id, user.email);
+        res.cookie('auth', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 1000 * 60 * 60 * 24 * 1, // 1 day same time to live of the jwt
+        });
+
+        return { user };
     }
 
     private generateToken(userId: string, email: string) {
