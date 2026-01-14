@@ -1,6 +1,4 @@
-import { Controller, Post, Body, Res, UseGuards, Get } from '@nestjs/common';
-import type { Response } from 'express';
-
+import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from 'src/shared/dtos/login.dto';
 import { RegisterDto } from 'src/shared/dtos/register.dto';
@@ -12,31 +10,18 @@ export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
     @Post('register')
-    async register(
-        @Body() dto: RegisterDto,
-        @Res({ passthrough: true }) response: Response,
-    ) {
-        return this.authService.register(dto, response);
+    async register(@Body() dto: RegisterDto) {
+        return this.authService.register(dto);
     }
 
     @Post('login')
-    async login(
-        @Body() dto: LoginDto,
-        @Res({ passthrough: true }) response: Response,
-    ) {
-        return this.authService.login(dto, response);
-    }
-
-    @Post('logout')
-    logout(@Res({ passthrough: true }) res: Response) {
-        res.clearCookie('auth');
-        return { message: 'Logged out' };
+    async login(@Body() dto: LoginDto) {
+        return this.authService.login(dto);
     }
 
     @UseGuards(AuthGuard)
-    @Get("validate")
+    @Get('validate')
     validateToken(@CurrentUser() user) {
-        return { message: user ? 'success' : 'error' }
+        return { message: user ? 'success' : 'error', user };
     }
-
 }

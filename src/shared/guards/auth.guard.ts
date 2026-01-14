@@ -11,15 +11,18 @@ export class AuthGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-        
-        const token = request.cookies?.auth?.access_token;
 
-        if (!token) throw new UnauthorizedException('Not authenticated');
+        const authHeader = request.headers['authorization'];
+        if (!authHeader) throw new UnauthorizedException('Not authenticated');
+
+        const [bearer, token] = authHeader.split(' ');
+        if (bearer !== 'Bearer' || !token) throw new UnauthorizedException('Invalid token format');
 
         try {
-            const payload = await this.jwtService.verifyAsync(token);
-            const user = await this.usersRepo.findById(payload.sub);
 
+            const payload = await this.jwtService.verifyAsync(token);
+
+            const user = await this.usersRepo.findById(payload.sub);
             if (!user) throw new UnauthorizedException('User not found');
 
             request.user = user;

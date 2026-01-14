@@ -9,11 +9,8 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  const frontendUrl = process.env.FRONTEND_URL;
-
   app.enableCors({
-    origin: frontendUrl,
-    credentials: true,
+    origin: '*',
   });
 
   app.useGlobalPipes(

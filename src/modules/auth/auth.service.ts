@@ -4,7 +4,6 @@ import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../users/user.repository';
 import { RegisterDto } from 'src/shared/dtos/register.dto';
 import { LoginDto } from 'src/shared/dtos/login.dto';
-import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -13,11 +12,9 @@ export class AuthService {
         private readonly jwtService: JwtService,
     ) { }
 
-    async register({ email, password, name }: RegisterDto, res: Response) {
+    async register({ email, password, name }: RegisterDto) {
         const exists = await this.usersRepo.findByEmail(email);
-
-        if (exists)
-            throw new ConflictException('Email already in use');
+        if (exists) throw new ConflictException('Email already in use');
 
         const passwordHash = await bcrypt.hash(password, 10);
 
@@ -29,46 +26,29 @@ export class AuthService {
 
         const token = this.generateToken(user.id, user.email);
 
-        res.cookie("auth", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            maxAge: 1000 * 60 * 60 * 24,
-            path: "/",
-        });
-
-        return { user: { name: user.name, email: user.email } };
-
+        return {
+            user: { name: user.name, email: user.email },
+            ...token,
+        };
     }
 
-    async login({ email, password }: LoginDto, res: Response) {
+    async login({ email, password }: LoginDto) {
         const user = await this.usersRepo.findByEmail(email);
-
         if (!user) throw new NotFoundException('User not found.');
 
         const passwordValid = await bcrypt.compare(password, user.password);
-
         if (!passwordValid) throw new UnauthorizedException('Invalid credentials.');
 
         const token = this.generateToken(user.id, user.email);
 
-
-        res.cookie("auth", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            maxAge: 1000 * 60 * 60 * 24,
-            path: "/",
-        });
-
-        return { user: { name: user.name, email: user.email } };
+        return {
+            user: { name: user.name, email: user.email },
+            ...token,
+        };
     }
 
     private generateToken(userId: string, email: string) {
         const payload = { sub: userId, email };
-
-        return {
-            access_token: this.jwtService.sign(payload),
-        };
+        return { access_token: this.jwtService.sign(payload) };
     }
 }
