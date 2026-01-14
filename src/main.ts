@@ -11,7 +11,7 @@ async function bootstrap() {
 
   const allowedOrigins = [
     'http://localhost:3000',
-    'https://task-manager-frontend-beryl-psi.vercel.app',
+    'https://task-manager-frontend-wvxv.onrender.com',
   ];
 
   app.enableCors({
