@@ -29,11 +29,14 @@ export class AuthService {
 
         const token = this.generateToken(user.id, user.email);
 
-        res.cookie('auth', token, {
+        const isProd = process.env.NODE_ENV === "production";
+
+        res.cookie("auth", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 1000 * 60 * 60 * 24 * 1, // 1 day same time to live of the jwt
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            maxAge: 1000 * 60 * 60 * 24,
+            path: "/",
         });
 
         return { user: { name: user.name, email: user.email } };
@@ -51,11 +54,14 @@ export class AuthService {
 
         const token = this.generateToken(user.id, user.email);
 
-        res.cookie('auth', token, {
+        const isProd = process.env.NODE_ENV === "production";
+
+        res.cookie("auth", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 1000 * 60 * 60 * 24 * 1, // 1 day same time to live of the jwt
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            maxAge: 1000 * 60 * 60 * 24,
+            path: "/",
         });
 
         return { user: { name: user.name, email: user.email } };
