@@ -16,23 +16,6 @@ export class TaskRepository {
         });
     }
 
-    async findAll(params: {
-        where: Prisma.TaskWhereInput;
-        skip?: number;
-        take?: number;
-    }): Promise<Task[]> {
-        const { where, skip, take } = params;
-
-        return this.prisma.task.findMany({
-            where,
-            skip,
-            take,
-            orderBy: {
-                createdAt: "desc",
-            },
-        });
-    }
-
     async update(
         id: string,
         data: Prisma.TaskUpdateInput,
@@ -49,7 +32,25 @@ export class TaskRepository {
         });
     }
 
-    async count(where: Prisma.TaskWhereInput): Promise<number> {
-        return this.prisma.task.count({ where });
+    async findAll(params: {
+        where?: Prisma.TaskWhereInput;
+        skip?: number;
+        take?: number;
+        orderBy?: Prisma.TaskOrderByWithRelationInput;
+    }): Promise<Task[]> {
+        const { where, skip, take, orderBy } = params;
+
+        return this.prisma.task.findMany({
+            where,
+            skip,
+            take,
+            orderBy,
+        });
+    }
+
+    async count(where?: Prisma.TaskWhereInput): Promise<number> {
+        return this.prisma.task.count({
+            where,
+        });
     }
 }

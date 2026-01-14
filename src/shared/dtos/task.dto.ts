@@ -37,6 +37,22 @@ export class FindTasksDto {
     limit?: string;
 
     @IsOptional()
-    @IsIn(["priority", "createdAt"])
-    order?: "priority" | "createdAt";
+    @IsString()
+    title?: string;
+
+    @IsOptional()
+    @IsEnum(TaskPriority)
+    priority?: TaskPriority;
+
+    @IsOptional()
+    @IsEnum(TaskStatus)
+    status?: TaskStatus;
+
+    @IsOptional()
+    @IsIn(["dueDate", "priority", "createdAt"])
+    order?: "dueDate" | "priority" | "createdAt";
+
+    @IsOptional()
+    @IsIn(["asc", "desc"])
+    orderBy?: "asc" | "desc";
 }

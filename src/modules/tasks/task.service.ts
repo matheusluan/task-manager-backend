@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
-import { TaskRepository } from "./task.repository";
 import { CreateTaskDto, FindTasksDto, UpdateTaskDto } from "src/shared/dtos/task.dto";
+import { Prisma } from "generated/prisma/client";
+import { TaskRepository } from "./task.repository";
 
 @Injectable()
 export class TaskService {
@@ -24,14 +25,22 @@ export class TaskService {
         const limit = Number(query.limit) || 10;
         const skip = (page - 1) * limit;
 
-        const where = { userId };
+        const where: Prisma.TaskWhereInput = {
+            userId,
+            ...(query.title ? { title: { contains: query.title, mode: "insensitive" } } : {}),
+            ...(query.priority ? { priority: query.priority } : {}),
+            ...(query.status ? { status: query.status } : {}),
+        };
+
+        let orderBy: Prisma.TaskOrderByWithRelationInput = { createdAt: "desc" };
+        if (query.order === "dueDate") {
+            orderBy = { dueDate: "asc" };
+        } else if (query.order === "createdAt") {
+            orderBy = { createdAt: "desc" };
+        }
 
         const [tasks, total] = await Promise.all([
-            this.taskRepo.findAll({
-                where,
-                skip,
-                take: limit,
-            }),
+            this.taskRepo.findAll({ where, skip, take: limit, orderBy }),
             this.taskRepo.count(where),
         ]);
 
@@ -44,6 +53,7 @@ export class TaskService {
                 totalPages: Math.ceil(total / limit),
             },
         };
+
     }
 
     async findById(id: string, userId: string) {
