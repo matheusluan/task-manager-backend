@@ -35,8 +35,8 @@ export class UserController {
 
         res.clearCookie('auth', {
             httpOnly: true,
-            sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none',
+            secure: true,
             path: '/',
         });
 

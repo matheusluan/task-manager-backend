@@ -9,13 +9,24 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://task-manager-frontend-beryl-psi.vercel.app',
+  ];
+
   app.enableCors({
     origin: (origin, callback) => {
-      callback(null, true);
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
   });
-  
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

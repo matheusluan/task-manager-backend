@@ -29,12 +29,10 @@ export class AuthService {
 
         const token = this.generateToken(user.id, user.email);
 
-        const isProd = process.env.NODE_ENV === "production";
-
         res.cookie("auth", token, {
             httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? "none" : "lax",
+            secure: true,
+            sameSite: 'none',
             maxAge: 1000 * 60 * 60 * 24,
             path: "/",
         });
@@ -54,12 +52,11 @@ export class AuthService {
 
         const token = this.generateToken(user.id, user.email);
 
-        const isProd = process.env.NODE_ENV === "production";
 
         res.cookie("auth", token, {
             httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? "none" : "lax",
+            secure: true,
+            sameSite: 'none',
             maxAge: 1000 * 60 * 60 * 24,
             path: "/",
         });
