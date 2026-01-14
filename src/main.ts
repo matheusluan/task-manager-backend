@@ -9,21 +9,10 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  const allowedOrigins = [
-    'http://localhost:3000',
-    'https://task-manager-frontend-wvxv.onrender.com',
-  ];
+  const frontendUrl = process.env.FRONTEND_URL;
 
   app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error('Not allowed by CORS'));
-    },
+    origin: frontendUrl,
     credentials: true,
   });
 
